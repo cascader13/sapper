@@ -119,14 +119,16 @@ public:
             if (!game_win and !game_lose and field_matrix[coord.first][coord.second][1] != 1 and field_matrix[coord.first][coord.second][2] == 0 and !tool) {
                 button->set_label(to_string(field_matrix[coord.first][coord.second][0]));
                 field_matrix[coord.first][coord.second][1] = 1;
-                dig_cell += 1;
+                if(field_matrix[coord.first][coord.second][0] == 0) {
+                    right_open_clear_field(coord.first, coord.second);
+                    left_open_clear_field(coord.first, coord.second);
+                }
                 if (field_matrix[coord.first][coord.second][0] == -1){
                     game_lose = true;
-                    Gtk::Image im("mine.png");
-                    button->set_image(im);
                 }
                 if (dig_cell == 71) game_win = true;
             }
+            count_open_field();
         }
 
     bool on_time() {
@@ -278,6 +280,45 @@ public:
                 field_matrix[i][j][0] = 0;
                 field_matrix[i][j][1] = 0;
                 field_matrix[i][j][2] = 0;
+            }
+        }
+    }
+
+    void right_open_clear_field(int i, int j){ // позволять открыть нулевые клетки справа и снизу
+        this->field_matrix[i][j][1] = 1;
+        if(i < 8 and field_matrix[i + 1][j][0] == 0 and field_matrix[i + 1][j][1] == 0 and field_matrix[i + 1][j][2] == 0) {
+            Gtk::Widget *widget = field.get_child_at(j, i + 1);
+            Gtk::Button *button = dynamic_cast<Gtk::Button *>(widget);
+            button->set_label("0");
+            right_open_clear_field(i + 1, j);
+        }
+        if(j < 8 and field_matrix[i][j + 1][0] == 0 and field_matrix[i][j + 1][1] == 0 and field_matrix[i][j + 1][2] == 0){
+            Gtk::Widget* widget = field.get_child_at(j + 1, i);
+            Gtk::Button* button = dynamic_cast<Gtk::Button*>(widget);
+            button->set_label("0");
+            right_open_clear_field(i, j + 1);
+        }
+    }
+    void left_open_clear_field(int i, int j){ // позволять открыть нулевые клетки слева и сверху
+        this->field_matrix[i][j][1] = 1;
+        if(i > 0 and field_matrix[i - 1][j][0] == 0 and field_matrix[i - 1][j][1] == 0 and field_matrix[i - 1][j][2] == 0){
+                Gtk::Widget* widget = field.get_child_at(j, i - 1);
+                Gtk::Button* button = dynamic_cast<Gtk::Button*>(widget);
+                button->set_label("0");
+                left_open_clear_field(i - 1, j);
+            }
+            if(j > 0 and field_matrix[i][j - 1][0] == 0 and field_matrix[i][j - 1][1] == 0 and field_matrix[i][j - 1][2] == 0){
+                Gtk::Widget* widget = field.get_child_at(j - 1, i);
+                Gtk::Button* button = dynamic_cast<Gtk::Button*>(widget);
+                button->set_label("0");
+                left_open_clear_field(i, j - 1);
+            }
+    }
+    void count_open_field(){ // подсчёт открытых клеток
+        dig_cell = 0;
+        for(int i = 0; i < 9; ++i){
+            for(int j = 0; j < 9; ++j){
+                dig_cell += field_matrix[i][j][1];
             }
         }
     }
