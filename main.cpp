@@ -103,15 +103,15 @@ public:
         }
     }
     void open_field(pair<int, int> coord, Gtk::Button* button) {// обработка нажатия на ячейку поля.
-        if (!game_start) {
+        if (!game_start) { // если игра не была начата, то программа при нажатии на ячейку поля создаёт данное поле и расставляет мины.
             make_field(coord.first, coord.second);
             game_start = true;
         }
-            if(!game_win and !game_lose and tool and field_matrix[coord.first][coord.second][1] != 1 and field_matrix[coord.first][coord.second][2] != 1){
+            if(!game_win and !game_lose and tool and field_matrix[coord.first][coord.second][1] != 1 and field_matrix[coord.first][coord.second][2] != 1){// если игрок пометил ячейку флагом
                 field_matrix[coord.first][coord.second][2] = 1;
                 button->set_label("М");
             }else {
-                if (!game_win and !game_lose and tool and field_matrix[coord.first][coord.second][2] == 1) {
+                if (!game_win and !game_lose and tool and field_matrix[coord.first][coord.second][2] == 1) { // если игрок убрал флаг с ячейки.
                     field_matrix[coord.first][coord.second][2] = 0;
                     button->set_label("");
                 }
@@ -119,20 +119,20 @@ public:
             if (!game_win and !game_lose and field_matrix[coord.first][coord.second][1] != 1 and field_matrix[coord.first][coord.second][2] == 0 and !tool) {
                 button->set_label(to_string(field_matrix[coord.first][coord.second][0]));
                 field_matrix[coord.first][coord.second][1] = 1;
-                if(field_matrix[coord.first][coord.second][0] == 0) {
+                if(field_matrix[coord.first][coord.second][0] == 0) { //если вокруг поля нет мин, то открывает соседние
                     right_open_clear_field(coord.first, coord.second);
                     left_open_clear_field(coord.first, coord.second);
                 }
-                if (field_matrix[coord.first][coord.second][0] == -1){
+                if (field_matrix[coord.first][coord.second][0] == -1){ // если поле оказалось миной.
                     game_lose = true;
                 }
-                if (dig_cell == 71) game_win = true;
+                if (dig_cell == 71) game_win = true; // при открытии 71 ячейки(не считая мин, флажок не считается за открытие ячейки) игрок выигрывает.
             }
-            count_open_field();
+            count_open_field(); // подсчтё результата.
         }
 
-    bool on_time() {
 
+    bool on_time() {//секундомер. при окончании игры выводит выиграл ли пользователь или нет, а также его время игры.
         if(game_start and !game_win and !game_lose) {
             time_second++;
             string minutes = "";
@@ -152,7 +152,7 @@ public:
                 minutes += to_string(time_minute);
             }
             time.set_label(minutes + ":" + seconds);
-        }else{
+        }else{// при завершении игры результат начинает чередоваться с временем каждую секунду.
             if(game_win){
                 if(period == 1){
                     time.set_label("VICTORY!");
@@ -213,7 +213,7 @@ public:
         int random_cell_j;
         while(mine != 10){
             random_cell_i = rand() % 9;
-            random_cell_j = rand() % 9;
+            random_cell_j = rand() % 9; // случайная позиция мины, если она подходит по следующему условию, а именно(в данной ячейке нет мины и на эту ячейку не нажал пользователь) то она сохраняется
             if(field_matrix[random_cell_i][random_cell_j][0] != -1 and random_cell_i != i_chose and random_cell_j != j_chose){//расставляются мины
                 field_matrix[random_cell_i][random_cell_j][0] = -1;
                 mine += 1;
@@ -274,7 +274,7 @@ public:
 
     }
 
-    void clear_field(){// очищает массив поля
+    void clear_field(){// очищает матрицу поля
         for(int i = 0; i < 9; ++i){
             for(int j = 0; j < 9; ++j){
                 field_matrix[i][j][0] = 0;
@@ -284,6 +284,7 @@ public:
         }
     }
 
+    // следующие 2 рекурсивные функции позволяют автоматически открывать все соседние 0-ые клетки. Было сделано 2 потому-что одной не получалось, так как рекурсия попросту не заканчивалась и происходил выход за массив.
     void right_open_clear_field(int i, int j){ // позволять открыть нулевые клетки справа и снизу
         this->field_matrix[i][j][1] = 1;
         if(i < 8 and field_matrix[i + 1][j][0] == 0 and field_matrix[i + 1][j][1] == 0 and field_matrix[i + 1][j][2] == 0) {
@@ -314,6 +315,8 @@ public:
                 left_open_clear_field(i, j - 1);
             }
     }
+
+
     void count_open_field(){ // подсчёт открытых клеток
         dig_cell = 0;
         for(int i = 0; i < 9; ++i){
